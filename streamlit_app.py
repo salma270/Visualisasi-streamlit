@@ -4,8 +4,8 @@ import plotly.graph_objs as go
 from collections import Counter
 import re
 
-# Setup MongoDB
-client = MongoClient("mongodb://localhost:27017/")
+# Gunakan koneksi MongoDB Atlas dari secrets
+client = MongoClient(st.secrets["mongo"]["uri"])
 db = client.flo_health
 collection = db.articles
 
@@ -16,11 +16,10 @@ st.title("Visualisasi Artikel Flo Health")
 
 # 1. Visualisasi Artikel tentang Menstruasi
 menstruation_keywords = ["menstruation", "period", "menstrual", "dysmenorrhea", "cramps", "cycle"]
-menstruation_count = 0
-for article in articles:
-    text = (article['title'] + " " + article['content']).lower()
-    if any(keyword in text for keyword in menstruation_keywords):
-        menstruation_count += 1
+menstruation_count = sum(
+    any(keyword in (article['title'] + " " + article['content']).lower() for keyword in menstruation_keywords)
+    for article in articles
+)
 
 menstruation_pie = go.Figure(data=[go.Pie(
     labels=['Menstruation Related', 'Others'],
